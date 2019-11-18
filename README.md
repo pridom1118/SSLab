@@ -1,7 +1,7 @@
 # SSLab2019-
 Bunch of practices &amp; exercises for System Programming (2019)
 
-Includes practices and exercises from sslab resources (originally from cmu resources)
+Includes practices and exercises from sslab resources (originally from cmu/~213 resources)
 
 
 Some helpful links:
