@@ -7,14 +7,15 @@
 
 /* GLOBAL VARIABLES */
 int* intArr; /* Frequency Distribution */
-pthread_mutex_t mutex, mutex2; /* for blocking concurrent access to critical section */
+pthread_mutex_t mutex; /* for blocking simultaneous accesses to critical section */
 
 /*GLOBAL VARIABLES BUT NOT IN CRITICAL SECTION */
-int FD;
-//int offset;
-int INTERVAL;
-int SIZE;
-int NUMT;
+int FD; /* For opening dataset */
+int INTERVAL; /* Size of an interval */
+int SIZE; /* Number of values */
+int NUMT; /* Number of threads */
+
+volatile int REMAINDER; /* To check whether there are remainders in SIZE / NUMT */
 
 /* a function for thread */
 /* input: an offset 
@@ -28,7 +29,6 @@ void *readT(void *data) {
 	int index = 0;
 	char buffer[4] = {'0', }; /* temporary buffer for reading values */
 
-	printf("current offset: %d\n", currentOffset);
 	for(i = 0; i < SIZE / NUMT; i++) {
 		pread(FD, buffer, 4, currentOffset);
 		currentValue = atoi(buffer);
@@ -36,8 +36,7 @@ void *readT(void *data) {
 		pthread_mutex_lock(&mutex);
 
 		intArr[atoi(buffer) / INTERVAL]++;
-
-//      printf("%d: %s\n", atoi(buffer) / INTERVAL, buffer); 
+		
 		pthread_mutex_unlock(&mutex);
 
 		currentOffset += 5;
@@ -46,6 +45,34 @@ void *readT(void *data) {
 	return NULL;
 }
 
+/* When there are remainders in SIZE / NUMT, the thread created at last
+   will calculate the frequency distribution to compensate for those remainders */
+
+void *readTX(void *data) {
+	int i;
+	int currentValue;
+	int currentOffset = *((int*)data);
+	int index = 0;
+	char buffer[4] = {'0', }; /* temporary buffer for reading values */
+
+	for(i = 0; i < SIZE / NUMT + REMAINDER; i++) {
+		pread(FD, buffer, 4, currentOffset);
+		currentValue = atoi(buffer);
+		
+		pthread_mutex_lock(&mutex);
+
+		intArr[atoi(buffer) / INTERVAL]++;
+
+		pthread_mutex_unlock(&mutex);
+
+		currentOffset += 5;
+	}
+
+	return NULL;
+
+}
+
+/* for checking whether the numbers have been recorded properly */
 void FDCheck() {
 	int i;
 	int sum = 0;
@@ -99,20 +126,18 @@ int getSize(int len) {
 }
 
 
-
 int main(int argc, char *argv[]){
 	/* Variables */
-    int offset;
-	int* offsetT;
-	char buffer[4] = {'0', }; 
-	int i;
+    int offset; 
+	int* offsetT; /* an array for storing each offsets that threads will be reading from */
+	int i; /* for loop statement */
 
 	/* Threads */
 	pthread_t* p_thread;
 	int* thr_id;
 
 	/* puts arguments' values to varaibles */
-	NUMT = atoi(argv[1]);
+	NUMT = atoi(argv[1]); 
 	INTERVAL = atoi(argv[2]);
 
 	/* Opens the file "dataset" */
@@ -125,6 +150,16 @@ int main(int argc, char *argv[]){
 	/* Reads the numbers of the values */
 	offset = getLen() + 1;
 	SIZE = getSize(getLen());
+	REMAINDER = SIZE % NUMT;
+
+	/* If the number of threads are bigger than the size, then 
+	 * threads will be created up to 'SIZE'
+	 */
+	if(NUMT > SIZE) { 
+//		printf("Number of threads are bigger than the size of the data \n");
+		NUMT = SIZE;
+//		printf("Current number of threads changed to %d\n", NUMT);
+	}
 
 	/* Initalizes the mutex */
 	pthread_mutex_init(&mutex, NULL);
@@ -134,6 +169,7 @@ int main(int argc, char *argv[]){
 	memset(intArr, 0, sizeof(intArr));
 
 	/* using threads */
+
 	p_thread = (pthread_t*)malloc(sizeof(pthread_t) * NUMT);
 	thr_id = (int*) malloc(sizeof(int) * NUMT);
 
@@ -142,13 +178,19 @@ int main(int argc, char *argv[]){
 	for(i = 0; i < NUMT; i++) {
 		offsetT[i] = offset;
 		/* an = a1 + 5(n - 1) */
-		offset += 5 * SIZE / NUMT; 
+		offset += 5 * (SIZE / NUMT); 
 	}
 		
 
 	/* Create threads for NUMT times */
+	
 	for(i = 0; i < NUMT; i++) {
-		thr_id[i] = pthread_create(&p_thread[i], NULL, readT, (void*) &offsetT[i]);
+		if(REMAINDER != 0 && i == NUMT - 1) {
+			thr_id[i] = pthread_create(&p_thread[i], NULL, readTX, (void*) &offsetT[i]);
+		} else {
+            thr_id[i] = pthread_create(&p_thread[i], NULL, readT, (void*) &offsetT[i]);
+		}
+        
 		if(thr_id[i] < 0) {
 			perror("pthread_create()");
 			exit(0);
@@ -164,7 +206,7 @@ int main(int argc, char *argv[]){
 	pthread_mutex_destroy(&mutex);
 	
 	printFD();
-	FDCheck();
+//	FDCheck();
 
 	close(FD);
 
