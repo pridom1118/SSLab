@@ -169,7 +169,6 @@ int main(int argc, char *argv[]){
 	memset(intArr, 0, sizeof(intArr));
 
 	/* using threads */
-
 	p_thread = (pthread_t*)malloc(sizeof(pthread_t) * NUMT);
 	thr_id = (int*) malloc(sizeof(int) * NUMT);
 
@@ -177,13 +176,12 @@ int main(int argc, char *argv[]){
 	offsetT = (int*) malloc(sizeof(int) * NUMT);
 	for(i = 0; i < NUMT; i++) {
 		offsetT[i] = offset;
-		/* an = a1 + 5(n - 1) */
+		/* an = a1 + 5(n - 1), a1 = offset */
 		offset += 5 * (SIZE / NUMT); 
 	}
 		
 
-	/* Create threads for NUMT times */
-	
+/* Create threads for NUMT times */	
 	for(i = 0; i < NUMT; i++) {
 		if(REMAINDER != 0 && i == NUMT - 1) {
 			thr_id[i] = pthread_create(&p_thread[i], NULL, readTX, (void*) &offsetT[i]);
