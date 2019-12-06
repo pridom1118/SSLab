@@ -89,7 +89,7 @@ void printFD() {
 	int i;
 	
 	for(i = 0; i < 10000 / INTERVAL; i++) {
-		printf("%4d -- %4d: %4d\n", i * INTERVAL, (i + 1) * INTERVAL - 1, intArr[i]);
+		printf("%4d\n", intArr[i]);
 	}
 }
 
@@ -156,9 +156,7 @@ int main(int argc, char *argv[]){
 	 * threads will be created up to 'SIZE'
 	 */
 	if(NUMT > SIZE) { 
-//		printf("Number of threads are bigger than the size of the data \n");
 		NUMT = SIZE;
-//		printf("Current number of threads changed to %d\n", NUMT);
 	}
 
 	/* Initalizes the mutex */
@@ -204,7 +202,6 @@ int main(int argc, char *argv[]){
 	pthread_mutex_destroy(&mutex);
 	
 	printFD();
-//	FDCheck();
 
 	close(FD);
 
