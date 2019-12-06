@@ -6,13 +6,23 @@
 #include <fcntl.h>
 #include <mqueue.h>
 #include <string.h>
+#include <signal.h>
 
 #define MSG_SIZE 4 /* size of int */
 #define MAX_PRIO 9999
 
 /* Maximum of values = 10000 */
 
+/* Reaps all the children */
+void reaper(int sig) {
+	while(waitpid(-1, 0, WNOHANG) > 0) {
+
+	}
+}
+
 /* Sender */
+/* Continuously reads the file from the given offset,
+ * then sends the values continuously to the message queue */
 void sender(int fd, int size, int interval, int numP, int offset, char* mqName) {
 	struct mq_attr attr;
 	int currentValue = 0;
@@ -22,7 +32,7 @@ void sender(int fd, int size, int interval, int numP, int offset, char* mqName) 
 	char buffer[4] = {'0', };
 	int currentOffset = offset;
 
-	attr.mq_maxmsg = 10;
+	attr.mq_maxmsg = 1;
 	attr.mq_msgsize = MSG_SIZE;
 
 	mqdes = mq_open(mqName, O_CREAT| O_WRONLY, 0666, &attr);
@@ -47,6 +57,7 @@ void sender(int fd, int size, int interval, int numP, int offset, char* mqName) 
 }
 
 /* SenderX */
+/* When remainder != 0 sends extra messages to the message queue */
 void senderX(int fd, int size, int interval, int numP, int remainder, int offset, char* mqName) {
 	struct mq_attr attr;
 	int currentValue = 0;
@@ -80,6 +91,7 @@ void senderX(int fd, int size, int interval, int numP, int remainder, int offset
 	mq_close(mqdes);
 }
 
+/* Opens the message queue and continuously reads the message queue */
 void receiver(int size, int interval, int numP, int* intArr, char* mqName) {
 	struct mq_attr attr;
 	int value;
@@ -99,7 +111,6 @@ void receiver(int size, int interval, int numP, int* intArr, char* mqName) {
 
 	while(mq_receive(mqdes, (char*)&value, MSG_SIZE, &prio) != -1) {
 		intArr[value / interval]++;
-//		printf("value get: %d index: %d\n", value, value / interval);
 		left--;
 		if(left == 0) {
 			break;
@@ -110,6 +121,7 @@ void receiver(int size, int interval, int numP, int* intArr, char* mqName) {
 	mq_unlink(mqName);
 }
 
+/* When remainder != 0, main should receive more messages */
 void receiverX(int size, int interval, int numP, int remainder, int* intArr, char* mqName) {
 	struct mq_attr attr;
 	int value;
@@ -129,7 +141,6 @@ void receiverX(int size, int interval, int numP, int remainder, int* intArr, cha
 
 	while(mq_receive(mqdes, (char*)&value, MSG_SIZE, &prio) != -1) {
 		intArr[value / interval]++;
-//		printf("value get: %d index: %d\n", value, value / interval);
 		left--;
 		if(left == 0) {
 			break;
@@ -214,7 +225,7 @@ void printFD(int* intArr, int interval) {
 	int i;
 
 	for(i = 0; i < 10000 / interval; i++) {
-		printf("%4d -- %4d: %4d \n", i * interval, (i + 1) * interval - 1, intArr[i]);
+		printf("%4d \n", intArr[i]);
 	}
 }
 
@@ -254,6 +265,9 @@ int main(int argc, char *argv[]) {
 
 	int i; /* for loop */
 	
+	/* adds new handler "reaper" */
+	signal(SIGCHLD, reaper);
+	
 	/* Gets the parameter */
 	numP = atoi(argv[1]);
 	interval = atoi(argv[2]);
@@ -273,6 +287,7 @@ int main(int argc, char *argv[]) {
 		numP = size;
 	}
 
+	/* Creates message names for message queues and store them to mqArr */
 	pid = (pid_t*) malloc(sizeof(pid_t) * numP);
 	mqArr = (char**) malloc(sizeof(char*) * numP);
 
@@ -281,14 +296,6 @@ int main(int argc, char *argv[]) {
 		strncpy(mqArr[i], mqName, 7);
 		nameInc(mqName);
 	}
-
-	printf("size: %d, interval: %d, offset: %d\n", size, interval, offset);
-
-	/*
-	for(i = 0; i < numP; i++) {
-		printf("[%d]: %s\n", i, mqArr[i]);
-	}
-	*/
 
 	/* Dynamically allocate the fd array */
 	intArr = (int*) malloc(sizeof(int) * (10000 / interval));
@@ -305,36 +312,36 @@ int main(int argc, char *argv[]) {
 	for(i = 0; i < numP; i++) {
 		if(remainder != 0 && i == numP - 1) {
 			if((pid[i] = fork()) == 0) {
-				printf("%d sender (R) \n", i+1);
 				senderX(fd, size, interval, numP, remainder, offsetP[i], mqArr[i]);
 				exit(0);
-			} else {
-				printf("%d receiver (R) \n", i + 1);
-				receiverX(size, interval, numP, remainder, intArr, mqArr[i]);
-				waitpid(pid[i], &status, 0);
 			}
 		} else {
 			if((pid[i] = fork()) == 0) { 
-				printf("%d sender \n", i+1);
 				sender(fd, size, interval, numP, offsetP[i], mqArr[i]);
 				exit(0);
-			} else {
-				printf("%d receiver \n", i + 1);
-				receiver(size, interval, numP, intArr, mqArr[i]);
-				waitpid(pid[i], &status, 0);
-				printf("done \n");
 			}
 		}
 	}
 
-	FDCheck(intArr, interval);
-
+	/* Receives the messages from the message queue */
+	for(i = 0; i < numP; i++) {
+		if(remainder != 0 && i == numP - 1) {
+			receiverX(size, interval, numP, remainder, intArr, mqArr[i]);
+		} else {
+			receiver(size, interval, numP, intArr, mqArr[i]);
+		}
+	}
+	
+	printFD(intArr, interval);
+	
+	/* Frees the dynamically allocated spaces and closes the file */
 	close(fd);
 
 	free(intArr);
 	free(offsetP);
 	free(pid);
 
+	/* Free the mqArr** */
 	for(i = 0; i < numP; i++) {
 		free(mqArr[i]);
 	}
