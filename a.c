@@ -6,11 +6,19 @@
 #include <fcntl.h>
 #include <mqueue.h>
 #include <string.h>
+#include <signal.h>
 
 #define MSG_SIZE 4 /* size of int */
 #define MAX_PRIO 9999
 
 /* Maximum of values = 10000 */
+
+/* Reaps all the children */
+void reaper(int sig) {
+	while(waitpid(-1, 0, WNOHANG) > 0) {
+
+	}
+}
 
 /* Sender */
 void sender(int fd, int size, int interval, int numP, int offset, char* mqName) {
@@ -22,7 +30,7 @@ void sender(int fd, int size, int interval, int numP, int offset, char* mqName) 
 	char buffer[4] = {'0', };
 	int currentOffset = offset;
 
-	attr.mq_maxmsg = 10;
+	attr.mq_maxmsg = 1;
 	attr.mq_msgsize = MSG_SIZE;
 
 	mqdes = mq_open(mqName, O_CREAT| O_WRONLY, 0666, &attr);
@@ -254,6 +262,8 @@ int main(int argc, char *argv[]) {
 
 	int i; /* for loop */
 	
+	signal(SIGCHLD, reaper);
+	
 	/* Gets the parameter */
 	numP = atoi(argv[1]);
 	interval = atoi(argv[2]);
@@ -305,36 +315,42 @@ int main(int argc, char *argv[]) {
 	for(i = 0; i < numP; i++) {
 		if(remainder != 0 && i == numP - 1) {
 			if((pid[i] = fork()) == 0) {
-				printf("%d sender (R) \n", i+1);
+//				printf("%d sender (R) \n", i+1);
 				senderX(fd, size, interval, numP, remainder, offsetP[i], mqArr[i]);
 				exit(0);
-			} else {
-				printf("%d receiver (R) \n", i + 1);
-				receiverX(size, interval, numP, remainder, intArr, mqArr[i]);
-				waitpid(pid[i], &status, 0);
 			}
 		} else {
 			if((pid[i] = fork()) == 0) { 
-				printf("%d sender \n", i+1);
+//				printf("%d sender \n", i+1);
 				sender(fd, size, interval, numP, offsetP[i], mqArr[i]);
 				exit(0);
-			} else {
-				printf("%d receiver \n", i + 1);
-				receiver(size, interval, numP, intArr, mqArr[i]);
-				waitpid(pid[i], &status, 0);
-				printf("done \n");
 			}
 		}
 	}
 
-	FDCheck(intArr, interval);
+	for(i = 0; i < numP; i++) {
+		if(remainder != 0 && i == numP - 1) {
+//			waitpid(pid[i], &status, 0);
+			receiverX(size, interval, numP, remainder, intArr, mqArr[i]);
+		} else {
+//			waitpid(pid[i], &status, 0);
+			receiver(size, interval, numP, intArr, mqArr[i]);
+		}
+	}
+	
 
+	FDCheck(intArr, interval);
+	printFD(intArr, interval);
+
+	
+	/* Frees the dynamically allocated spaces and closes the file */
 	close(fd);
 
 	free(intArr);
 	free(offsetP);
 	free(pid);
 
+	/* Free the mqArr** */
 	for(i = 0; i < numP; i++) {
 		free(mqArr[i]);
 	}
