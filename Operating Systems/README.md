@@ -5,5 +5,5 @@
   <li> Memory Management Unit </li>
 </ol>
 
-<br> Graded 27.5 / 30.
+<br> Got 27.5/30
 <br> There are some errors - needs to be fixed.
