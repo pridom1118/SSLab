@@ -14,6 +14,6 @@ Includes practices and exercises from sslab resources (originally from cmu/~213 
 3. http://csapp.cs.cmu.edu/ <br>
 
 <h2> Operating Systems </h2>
-1.https://pages.cs.wisc.edu/~remzi/OSTEP/
+1.https://pages.cs.wisc.edu/~remzi/OSTEP/ <br>
 
-Enjoy.
+<br> Enjoy.
