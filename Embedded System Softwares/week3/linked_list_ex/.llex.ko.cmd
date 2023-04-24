@@ -1,0 +1,1 @@
+cmd_/home/pridom1118/Desktop/ess2023/week3/linked_list_ex/llex.ko := ld -r -m elf_x86_64 -z max-page-size=0x200000 -z noexecstack  -T ./scripts/module-common.lds --build-id  -o /home/pridom1118/Desktop/ess2023/week3/linked_list_ex/llex.ko /home/pridom1118/Desktop/ess2023/week3/linked_list_ex/llex.o /home/pridom1118/Desktop/ess2023/week3/linked_list_ex/llex.mod.o ;  true

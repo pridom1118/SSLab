@@ -1,0 +1,1 @@
+cmd_/home/pridom1118/Desktop/ess2023/week6/ch5/ch5_mod.ko := /usr/bin/arm-linux-gnueabi-ld -r  -EL -T ./scripts/module-common.lds -T ./arch/arm/kernel/module.lds  --build-id  -o /home/pridom1118/Desktop/ess2023/week6/ch5/ch5_mod.ko /home/pridom1118/Desktop/ess2023/week6/ch5/ch5_mod.o /home/pridom1118/Desktop/ess2023/week6/ch5/ch5_mod.mod.o ;  true

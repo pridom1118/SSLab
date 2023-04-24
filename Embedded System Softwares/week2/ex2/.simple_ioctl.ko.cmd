@@ -1,0 +1,1 @@
+cmd_/home/pridom1118/Desktop/ess2023/week2/ex2/simple_ioctl.ko := ld -r -m elf_x86_64 -z max-page-size=0x200000 -T ./scripts/module-common.lds --build-id  -o /home/pridom1118/Desktop/ess2023/week2/ex2/simple_ioctl.ko /home/pridom1118/Desktop/ess2023/week2/ex2/simple_ioctl.o /home/pridom1118/Desktop/ess2023/week2/ex2/simple_ioctl.mod.o ;  true

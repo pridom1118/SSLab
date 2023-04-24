@@ -1,0 +1,1 @@
+cmd_/home/pridom1118/Desktop/ess2023/week1/debug/debug.ko := ld -r -m elf_x86_64 -z max-page-size=0x200000 -T ./scripts/module-common.lds --build-id  -o /home/pridom1118/Desktop/ess2023/week1/debug/debug.ko /home/pridom1118/Desktop/ess2023/week1/debug/debug.o /home/pridom1118/Desktop/ess2023/week1/debug/debug.mod.o ;  true
