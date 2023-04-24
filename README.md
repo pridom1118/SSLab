@@ -1,6 +1,6 @@
 # SSLab
 Covers System Programming (2019-2), Operating Systems (2022-1), 
-and hopefully Embedded System Programming (4-1).
+and Embedded System Software (2023-1).
 
 Uploads assignments and exercises for the classes. <br>
 Visit http://sslab.konkuk.ac.kr for more. <br>
@@ -14,6 +14,6 @@ Includes practices and exercises from sslab resources (originally from cmu/~213 
 3. http://csapp.cs.cmu.edu/ <br>
 
 <h2> Operating Systems </h2>
-1.https://pages.cs.wisc.edu/~remzi/OSTEP/ <br>
+1. https://pages.cs.wisc.edu/~remzi/OSTEP/ <br>
 
 <br> Enjoy.
