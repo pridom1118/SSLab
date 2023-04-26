@@ -1,1 +1,0 @@
-cmd_/home/pridom1118/Desktop/ess2023/week6/led/simple_led.ko := /usr/bin/arm-linux-gnueabi-ld -r  -EL -T ./scripts/module-common.lds -T ./arch/arm/kernel/module.lds  --build-id  -o /home/pridom1118/Desktop/ess2023/week6/led/simple_led.ko /home/pridom1118/Desktop/ess2023/week6/led/simple_led.o /home/pridom1118/Desktop/ess2023/week6/led/simple_led.mod.o ;  true

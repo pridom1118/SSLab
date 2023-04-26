@@ -1,1 +1,0 @@
-cmd_/home/pridom1118/Desktop/ess2023/week3/ex1/simple_linked_list.ko := ld -r -m elf_x86_64 -z max-page-size=0x200000 -T ./scripts/module-common.lds --build-id  -o /home/pridom1118/Desktop/ess2023/week3/ex1/simple_linked_list.ko /home/pridom1118/Desktop/ess2023/week3/ex1/simple_linked_list.o /home/pridom1118/Desktop/ess2023/week3/ex1/simple_linked_list.mod.o ;  true

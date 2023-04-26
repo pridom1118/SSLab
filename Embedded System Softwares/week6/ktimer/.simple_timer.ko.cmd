@@ -1,1 +1,0 @@
-cmd_/home/pridom1118/Desktop/ess2023/week6/ktimer/simple_timer.ko := /usr/bin/arm-linux-gnueabi-ld -r  -EL -T ./scripts/module-common.lds -T ./arch/arm/kernel/module.lds  --build-id  -o /home/pridom1118/Desktop/ess2023/week6/ktimer/simple_timer.ko /home/pridom1118/Desktop/ess2023/week6/ktimer/simple_timer.o /home/pridom1118/Desktop/ess2023/week6/ktimer/simple_timer.mod.o ;  true

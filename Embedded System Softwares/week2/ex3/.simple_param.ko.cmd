@@ -1,1 +1,0 @@
-cmd_/home/pridom1118/Desktop/ess2023/week2/ex3/simple_param.ko := ld -r -m elf_x86_64 -z max-page-size=0x200000 -T ./scripts/module-common.lds --build-id  -o /home/pridom1118/Desktop/ess2023/week2/ex3/simple_param.ko /home/pridom1118/Desktop/ess2023/week2/ex3/simple_param.o /home/pridom1118/Desktop/ess2023/week2/ex3/simple_param.mod.o ;  true
