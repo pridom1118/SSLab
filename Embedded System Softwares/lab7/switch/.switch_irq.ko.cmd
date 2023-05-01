@@ -1,0 +1,1 @@
+cmd_/home/pridom1118/Desktop/ess2023/lab7/switch/switch_irq.ko := /usr/bin/arm-linux-gnueabi-ld -r  -EL -T ./scripts/module-common.lds -T ./arch/arm/kernel/module.lds  --build-id  -o /home/pridom1118/Desktop/ess2023/lab7/switch/switch_irq.ko /home/pridom1118/Desktop/ess2023/lab7/switch/switch_irq.o /home/pridom1118/Desktop/ess2023/lab7/switch/switch_irq.mod.o ;  true
