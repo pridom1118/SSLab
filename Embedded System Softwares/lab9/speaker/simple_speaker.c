@@ -20,7 +20,6 @@ static void play(int note) {
 
 static int __init simple_speaker_init(void) {
 	int notes[] = { 1911, 1702, 1516, 1431, 1275, 1136, 1012 }; // C D E F G A B
-	int notes[] = 
 	int i = 0;
 
 	gpio_request_one(SPEAKER, GPIOF_OUT_INIT_LOW, "SPEAKER");
