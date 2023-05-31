@@ -24,16 +24,19 @@ static int proc_info_open(struct inode *inode, struct file *file) {
 }
 
 static ssize_t proc_info_write(struct file *file, const char __user *ubuf, size_t ubuf_len, loff_t *pos) {
-	char buf[BUF_SIZE];
+	int len;
+	char buf[BUF_SIZE] = { 0, };
 
 	if(ubuf_len > BUF_SIZE) return -1;
 
 	if(copy_from_user(buf, ubuf, ubuf_len)) return -1;
 
 	memset(str, 0, sizeof(str));
-	sscanf(buf, "%s\n", str);
-	
-	return strlen(buf);
+
+	len = strlen(buf);
+	strlcpy(str, buf, len);
+
+	return len;
 }
 
 static ssize_t proc_info_read(struct file *file, char __user *ubuf, size_t ubuf_len, loff_t *pos) {
